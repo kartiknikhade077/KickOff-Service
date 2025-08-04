@@ -9,6 +9,10 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -19,6 +23,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -356,6 +361,29 @@ public class CompanyController {
 			
 			List<KickOffSignature> saved = kickOffSignatureRepository.saveAll(kickOffSignature);
 			return ResponseEntity.ok(saved);
+
+		} catch (Exception e) {
+
+			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error " + e.getMessage());
+		}
+	}
+	
+	
+	@GetMapping("/getAllKickOffs/{page}/{size}")
+	public ResponseEntity<?> getAllKickOffs(@PathVariable int page,@PathVariable int size, @RequestParam(defaultValue = "") String projectName) {
+		try {
+			
+			
+			Map<String ,Object> data=new HashMap<String , Object>();
+			 Pageable pageable = PageRequest.of(page, size, Sort.by("createdDateTime").descending());
+			
+		        Page<KickOff> kickOffPage = kickOffRepository.findByCompanyIdAndProjectNameContainingIgnoreCase(company.getCompanyId(),projectName, pageable);
+		        List<KickOff> kickOffList = kickOffPage.getContent();
+		        data.put("kickOffList", kickOffList);
+		        data.put("totalPages", kickOffPage.getTotalPages());
+		        data.put("currentPage", kickOffPage.getNumber());
+			return ResponseEntity.ok(data);
 
 		} catch (Exception e) {
 
