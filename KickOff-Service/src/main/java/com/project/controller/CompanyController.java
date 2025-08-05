@@ -619,5 +619,23 @@ public class CompanyController {
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error " + e.getMessage());
 		}
 	}
+	
+	
+	@GetMapping("/getWorkOrderByEmployeeId/{employeeId}")
+	public ResponseEntity<?> getWorkOrderByEmployeeId(@PathVariable String employeeId) {
+
+		try {
+			List<ItemProcess>  itemProcessList=itemProcessRepository.findByEmployeeId(employeeId);
+			
+			return ResponseEntity.ok(itemProcessList);
+
+		} catch (Exception e) {
+
+			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error " + e.getMessage());
+		}
+	}
+	
+	
 
 }
