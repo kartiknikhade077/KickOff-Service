@@ -28,24 +28,25 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.client.UserSerivceClinet;
 import com.project.dto.Company;
+import com.project.entity.CheckListCategory;
+import com.project.entity.CheckListCategoryAndItems;
+import com.project.entity.CheckListInfo;
+import com.project.entity.CheckListItemsInfo;
 import com.project.entity.CustomerRequirements;
 import com.project.entity.ItemProcess;
 import com.project.entity.ItemsImages;
 import com.project.entity.KickOff;
 import com.project.entity.KickOffItems;
-import com.project.repository.CustomerRequirementsRepository;
-import com.project.repository.ItemImageRepository;
-import com.project.repository.KickOffItemsRepository;
-import com.project.repository.KickOffRepository;
-import com.project.repository.KickOffSignature;
-import com.project.repository.KickOffSignatureRepository;
-import com.project.repository.itemProcessRepository;
+import com.project.repository.*;
 
 @RestController
 @RequestMapping("/kickoff")
 public class CompanyController {
+
+    private final CheckListCategoryAndItemsRepository checkListCategoryAndItemsRepository;
 	
 	@Autowired
 	private UserSerivceClinet userSerivceClinet;
@@ -68,7 +69,20 @@ public class CompanyController {
 	@Autowired
 	private KickOffSignatureRepository kickOffSignatureRepository;
 	
+	@Autowired
+	private CheckListInfoRepository checkListInfoRepository;
+	
+	@Autowired
+	private CheckListItemsInfoRepository checkListItemsInfoRepository;
+	
+	@Autowired
+	private CheckListCategoryRepository checkListCategoryRepository;
+	
 	Company company;
+
+    CompanyController(CheckListCategoryAndItemsRepository checkListCategoryAndItemsRepository) {
+        this.checkListCategoryAndItemsRepository = checkListCategoryAndItemsRepository;
+    }
 
 	@ModelAttribute
 	public void companyDetails() {
@@ -384,6 +398,220 @@ public class CompanyController {
 		        data.put("totalPages", kickOffPage.getTotalPages());
 		        data.put("currentPage", kickOffPage.getNumber());
 			return ResponseEntity.ok(data);
+
+		} catch (Exception e) {
+
+			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error " + e.getMessage());
+		}
+	}
+	
+	
+	
+	@PostMapping("/createCheckList")
+	public ResponseEntity<?> createCheckList(@RequestBody Map<String, Object> request) {
+	    try {
+	        // Step 1: Extract "checkListInfo" map and convert to CheckList object
+	        ObjectMapper mapper = new ObjectMapper();
+	        
+	        // Convert to CheckList
+	        CheckListInfo checkList = mapper.convertValue(request.get("checkListInfo"), CheckListInfo.class);
+
+	        // Save the checklist
+	        CheckListInfo savedCheckList = checkListInfoRepository.save(checkList);
+	        String checkListId = savedCheckList.getCheckListId();
+
+	        // Step 2: Extract "checkListItems" list and convert to List<CheckListItem>
+	        List<Map<String, Object>> itemsList = (List<Map<String, Object>>) request.get("checkListItems");
+
+	        List<CheckListItemsInfo> itemsToSave = new ArrayList<>();
+	        for (Map<String, Object> itemMap : itemsList) {
+	        	CheckListItemsInfo item = mapper.convertValue(itemMap, CheckListItemsInfo.class);
+	            item.setCheckListId(checkListId); // Set foreign key
+	            itemsToSave.add(item);
+	        }
+
+	        checkListItemsInfoRepository.saveAll(itemsToSave);
+
+	        return ResponseEntity.ok("Checklist and items created successfully.");
+
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+	                             .body("Error: " + e.getMessage());
+	    }
+	}
+	
+	
+	@PutMapping("/updateCheckList")
+	public ResponseEntity<?> updateCheckList(@RequestBody Map<String, Object> request) {
+	    try {
+	        // Step 1: Extract "checkListInfo" map and convert to CheckList object
+	        ObjectMapper mapper = new ObjectMapper();
+	        
+	        // Convert to CheckList
+	        CheckListInfo checkList = mapper.convertValue(request.get("checkListInfo"), CheckListInfo.class);
+
+	        // Save the checklist
+	        checkList.setCreatedDateTime(LocalDateTime.now());
+	        checkList.setCompanyId(company.getCompanyId());
+	        CheckListInfo savedCheckList = checkListInfoRepository.save(checkList);
+	        String checkListId = savedCheckList.getCheckListId();
+
+	        // Step 2: Extract "checkListItems" list and convert to List<CheckListItem>
+	        List<Map<String, Object>> itemsList = (List<Map<String, Object>>) request.get("checkListItems");
+
+	        List<CheckListItemsInfo> itemsToSave = new ArrayList<>();
+	        for (Map<String, Object> itemMap : itemsList) {
+	        	CheckListItemsInfo item = mapper.convertValue(itemMap, CheckListItemsInfo.class);
+	            itemsToSave.add(item);
+	        }
+
+	        checkListItemsInfoRepository.saveAll(itemsToSave);
+
+	        return ResponseEntity.ok("Checklist and items created successfully.");
+
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+	                             .body("Error: " + e.getMessage());
+	    }
+	}
+	
+	
+	@GetMapping("/getCheckListData/{checkListId}")
+	public ResponseEntity<?> getCheckListData(@PathVariable String checkListId) {
+
+		try {
+			
+			Map<String,Object> data=new HashMap<>();
+			
+			CheckListInfo checkListInfo=checkListInfoRepository.findByCheckListId(checkListId);
+			List<CheckListItemsInfo> checkListItemsInfo=checkListItemsInfoRepository.findByCheckListId(checkListId);
+			
+			data.put("checkListInfo", checkListInfo);
+			data.put("checkListItemsList",checkListItemsInfo);
+			
+			return ResponseEntity.ok(data);
+
+		} catch (Exception e) {
+
+			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error " + e.getMessage());
+		}
+	}
+	
+	
+	
+	@GetMapping("/getAllCheckList/{page}/{size}")
+	public ResponseEntity<?> getAllCheckList(@PathVariable int page,@PathVariable int size, @RequestParam(defaultValue = "") String projectName) {
+		try {
+			
+			
+			Map<String ,Object> data=new HashMap<String , Object>();
+			 Pageable pageable = PageRequest.of(page, size, Sort.by("createdDateTime").descending());
+			
+		        Page<CheckListInfo> checkListInfoPage = checkListInfoRepository.findByCompanyIdAndProjectNameContainingIgnoreCase(company.getCompanyId(),projectName, pageable);
+		        List<CheckListInfo> allCheckList = checkListInfoPage.getContent();
+		        data.put("allCheckList", allCheckList);
+		        data.put("totalPages", checkListInfoPage.getTotalPages());
+		        data.put("currentPage", checkListInfoPage.getNumber());
+			return ResponseEntity.ok(data);
+
+		} catch (Exception e) {
+
+			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error " + e.getMessage());
+		}
+	}
+	
+	
+	@PostMapping("/createCheckListCategory")
+	public ResponseEntity<?> createCheckListCategory(@RequestBody CheckListCategory checkListCategory) {
+
+		try {
+			checkListCategory.setCompanyId(company.getCompanyId());
+			
+			return ResponseEntity.ok(checkListCategoryRepository.save(checkListCategory));
+
+		} catch (Exception e) {
+
+			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error " + e.getMessage());
+		}
+	}
+	
+	
+	@PutMapping("/updateCheckListCategory")
+	public ResponseEntity<?> updateCheckListCategory(@RequestBody List<CheckListCategory> checkListCategory) {
+
+		try {
+			List<CheckListCategory>  saved=checkListCategoryRepository.saveAll(checkListCategory);
+			
+			return ResponseEntity.ok(saved);
+
+		} catch (Exception e) {
+
+			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error " + e.getMessage());
+		}
+	}
+	
+	
+	@GetMapping("/getCheckListCategory")
+	public ResponseEntity<?> getCheckListCategory() {
+
+		try {
+			List<CheckListCategory>  categoryList=checkListCategoryRepository.findByCompanyIdOrderBySequence(company.getCompanyId());
+			
+			return ResponseEntity.ok(categoryList);
+
+		} catch (Exception e) {
+
+			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error " + e.getMessage());
+		}
+	}
+	
+	@PostMapping("/createCheckListCategoryWithItem")
+	public ResponseEntity<?> createCheckListCategoryWithItem(@RequestBody CheckListCategoryAndItems checkListCategoryAndItems) {
+
+		try {
+			checkListCategoryAndItems.setCompanyId(company.getCompanyId());
+			
+			return ResponseEntity.ok(checkListCategoryAndItemsRepository.save(checkListCategoryAndItems));
+
+		} catch (Exception e) {
+
+			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error " + e.getMessage());
+		}
+	}
+	
+	
+	@PutMapping("/updateCheckListCategoryWithItem")
+	public ResponseEntity<?> updateCheckListCategoryWithItem(@RequestBody List<CheckListCategoryAndItems> checkListCategoryAndItems) {
+
+		try {
+			
+			
+			return ResponseEntity.ok(checkListCategoryAndItemsRepository.saveAll(checkListCategoryAndItems));
+
+		} catch (Exception e) {
+
+			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error " + e.getMessage());
+		}
+	}
+	
+	
+	@GetMapping("/getCheckListCategoryAndItem")
+	public ResponseEntity<?> getCheckListCategoryAndItem() {
+
+		try {
+			List<CheckListCategoryAndItems>  itemListList=checkListCategoryAndItemsRepository.findByCompanyIdOrderBySequence(company.getCompanyId());
+			
+			return ResponseEntity.ok(itemListList);
 
 		} catch (Exception e) {
 
