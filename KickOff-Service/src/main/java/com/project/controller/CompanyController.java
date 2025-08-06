@@ -891,5 +891,39 @@ public class CompanyController {
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error " + e.getMessage());
 		}
 	}
+	
+	
+	@GetMapping("/getItemNoByProjectId/{projectId}")
+	public ResponseEntity<?> getItemNoByProjectId(@PathVariable String projectId) {
+
+		try {
+		
+		   List<Integer> itemNo=kickOffItemsRepository.findItemNoByProjectId(projectId);
+			
+			return ResponseEntity.ok(itemNo);
+
+		} catch (Exception e) {
+
+			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error " + e.getMessage());
+		}
+	}
+	
+	
+	@GetMapping("/getWorkOrderNumberByItemNo/{itemNo}")
+	public ResponseEntity<?> getWorkOrderNumber(@PathVariable Integer itemNo) {
+
+		try {
+		
+		   List<String> workOrderNumbers=itemProcessRepository.findWorkOrderNumberByItemNo(itemNo);
+			
+			return ResponseEntity.ok(workOrderNumbers);
+
+		} catch (Exception e) {
+
+			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error " + e.getMessage());
+		}
+	}
 
 }
