@@ -574,26 +574,28 @@ public class CompanyController {
 	}
 	
 	@PostMapping("/createCheckListCategoryWithItem")
-	public ResponseEntity<?> createCheckListCategoryWithItem(@RequestBody CheckListCategoryAndItems checkListCategoryAndItems) {
+	public ResponseEntity<?> createCheckListCategoriesWithItems(@RequestBody List<CheckListCategoryAndItems> items) {
+	    try {
+	        for (CheckListCategoryAndItems item : items) {
+	            item.setCompanyId(company.getCompanyId());
+	        }
 
-		try {
-			checkListCategoryAndItems.setCompanyId(company.getCompanyId());
-			
-			return ResponseEntity.ok(checkListCategoryAndItemsRepository.save(checkListCategoryAndItems));
-
-		} catch (Exception e) {
-
-			e.printStackTrace();
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error " + e.getMessage());
-		}
+	        return ResponseEntity.ok(checkListCategoryAndItemsRepository.saveAll(items));
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error: " + e.getMessage());
+	    }
 	}
+
 	
 	
 	@PutMapping("/updateCheckListCategoryWithItem")
 	public ResponseEntity<?> updateCheckListCategoryWithItem(@RequestBody List<CheckListCategoryAndItems> checkListCategoryAndItems) {
 
 		try {
-			
+			for (CheckListCategoryAndItems item : checkListCategoryAndItems) {
+				item.setCompanyId(company.getCompanyId());
+			}
 			
 			return ResponseEntity.ok(checkListCategoryAndItemsRepository.saveAll(checkListCategoryAndItems));
 
@@ -636,6 +638,29 @@ public class CompanyController {
 		}
 	}
 	
+	@DeleteMapping("/deleteCheckListCategoryById/{id}")
+    public ResponseEntity<String> deleteCategoryById(@PathVariable("id") String categoryId) {
+        if (checkListCategoryRepository.existsById(categoryId)) {
+            checkListCategoryRepository.deleteById(categoryId);
+            return ResponseEntity.ok("Category deleted successfully");
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                                 .body("Category not found with ID: " + categoryId);
+        }
+    }
 	
+	@DeleteMapping("/deleteCheckListItem/{itemId}")
+    public ResponseEntity<?> deleteCheckListItem(@PathVariable String itemId) {
+        try {
+            if (!checkListCategoryAndItemsRepository.existsById(itemId)) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Item not found with ID: " + itemId);
+            }
+
+            checkListCategoryAndItemsRepository.deleteById(itemId);
+            return ResponseEntity.ok("Checklist item deleted successfully");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error deleting item: " + e.getMessage());
+        }
+    }
 
 }
