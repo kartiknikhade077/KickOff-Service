@@ -20,6 +20,7 @@ public class ItemProcess {
     private double height;
     private double width;
     private String remarks;
+    private String operationNumber;
 	public ItemProcess(String partProcessId, String kickOffId, int itemNo, String workOrderNumber, String designerName,
 			String employeeId, String process, double length, double height, double width, String remarks) {
 		super();
@@ -104,6 +105,12 @@ public class ItemProcess {
 	}
 	public void setRemarks(String remarks) {
 		this.remarks = remarks;
+	}
+	public String getOperationNumber() {
+		return operationNumber;
+	}
+	public void setOperationNumber(String operationNumber) {
+		this.operationNumber = operationNumber;
 	}
     
     
