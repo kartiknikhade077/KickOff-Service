@@ -40,6 +40,9 @@ import com.project.entity.ItemProcess;
 import com.project.entity.ItemsImages;
 import com.project.entity.KickOff;
 import com.project.entity.KickOffItems;
+import com.project.entity.MOMEntries;
+import com.project.entity.MOMEntriesImages;
+import com.project.entity.MOMInfo;
 import com.project.repository.*;
 
 @RestController
@@ -77,6 +80,15 @@ public class CompanyController {
 	
 	@Autowired
 	private CheckListCategoryRepository checkListCategoryRepository;
+	
+	@Autowired
+	private MOMEntriesInfoRepositories momEntriesInfoRepositories;
+	
+	@Autowired
+	private MOMEntriesImagesRepository momEntriesImagesRepository;
+	
+	@Autowired
+	private MOMInfoRepository momInfoRepository;
 	
 	Company company;
 
@@ -526,6 +538,21 @@ public class CompanyController {
 	}
 	
 	
+	@DeleteMapping("/deleteCheckListItem/{itemId}")
+    public ResponseEntity<?> deleteCheckListItem(@PathVariable String itemId) {
+        try {
+            if (!checkListCategoryAndItemsRepository.existsById(itemId)) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Item not found with ID: " + itemId);
+            }
+
+            checkListCategoryAndItemsRepository.deleteById(itemId);
+            return ResponseEntity.ok("Checklist item deleted successfully");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error deleting item: " + e.getMessage());
+        }
+    }
+	
+	
 	@PostMapping("/createCheckListCategory")
 	public ResponseEntity<?> createCheckListCategory(@RequestBody CheckListCategory checkListCategory) {
 
@@ -649,18 +676,220 @@ public class CompanyController {
         }
     }
 	
-	@DeleteMapping("/deleteCheckListItem/{itemId}")
-    public ResponseEntity<?> deleteCheckListItem(@PathVariable String itemId) {
-        try {
-            if (!checkListCategoryAndItemsRepository.existsById(itemId)) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Item not found with ID: " + itemId);
-            }
+	
+	@PostMapping("/createMOM")
+	public ResponseEntity<?> createMOM(@RequestBody Map<String, Object> request) {
 
-            checkListCategoryAndItemsRepository.deleteById(itemId);
-            return ResponseEntity.ok("Checklist item deleted successfully");
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error deleting item: " + e.getMessage());
-        }
-    }
+		try {
+			 ObjectMapper mapper = new ObjectMapper();
+		        
+		        // Convert to CheckList
+		        MOMInfo momInfo = mapper.convertValue(request.get("momInfo"), MOMInfo.class);
+		        
+		        momInfo.setCompanyId(company.getCompanyId());
+		        MOMInfo saveMOMInfo=  momInfoRepository.save(momInfo);
+		        
+		        
+
+		        // Step 2: Extract "checkListItems" list and convert to List<CheckListItem>
+		        List<Map<String, Object>> momEntriesList = (List<Map<String, Object>>) request.get("momEntries");
+		        
+
+		     //   List<MOMEntries> itemsToSave = new ArrayList<>();
+		        for (Map<String, Object> itemMap : momEntriesList) {
+		        	MOMEntries item = mapper.convertValue(itemMap, MOMEntries.class);
+		        	item.setMomId(saveMOMInfo.getMomId());
+		           	MOMEntries savedMomEntries=  momEntriesInfoRepositories.save(item);
+		            saveImages(savedMomEntries.getMomEntryId(), item.getIllustrationImages(),item.getCorrectedImages());
+			        }
+
+			     
+
+		        return ResponseEntity.ok("MOM created Successfully");
+		} catch (Exception e) {
+
+			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error " + e.getMessage());
+		}
+	}
+	
+
+		     
+	
+	private void saveImages(String momEntryId, List<String> illustrationImages, List<String> correctedImages) {
+	    try {
+	        if (illustrationImages != null) {
+	            for (String base64Image : illustrationImages) {
+	            	
+	                saveImage(momEntryId, base64Image, "illustration");
+	            }
+	        }
+
+	        if (correctedImages != null) {
+	            for (String base64Image : correctedImages) {
+	                saveImage(momEntryId, base64Image, "corrected");
+	            }
+	        }
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    }
+	}
+
+	private void saveImage(String momEntryId, String base64Data, String imageType) {
+	    try {
+	        String base64Image = base64Data.contains(",") ? base64Data.split(",")[1] : base64Data;
+	        byte[] imageBytes = Base64.getDecoder().decode(base64Image);
+
+	        MOMEntriesImages image = new MOMEntriesImages();
+	        image.setMomEntryId(momEntryId);
+	        image.setImage(imageBytes);
+	        image.setType(imageType);
+
+	        momEntriesImagesRepository.save(image);
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    }
+	}
+	
+	@PutMapping("/updateMOMInfo")
+	public ResponseEntity<?> updateMOMInfo(@RequestBody MOMInfo momInfo) {
+
+		try {
+		
+			momInfo.setCompanyId(company.getCompanyId());
+			
+			return ResponseEntity.ok(momInfoRepository.save(momInfo));
+
+		} catch (Exception e) {
+
+			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error " + e.getMessage());
+		}
+	}
+	
+	//use this api while adding th mom entries section
+	
+	@PostMapping("/addMOMEntry")
+	public ResponseEntity<?> addMOMEntry(@RequestBody List<MOMEntries> momEntries) {
+
+		try {
+			
+			 for (MOMEntries item : momEntries) {
+	
+		        	MOMEntries savedMomEntries=  momEntriesInfoRepositories.save(item);
+		            saveImages(savedMomEntries.getMomEntryId(), item.getIllustrationImages(),item.getCorrectedImages());
+			        }
+			return ResponseEntity.ok("All MOM entries saved successfully.");
+
+		} catch (Exception e) {
+
+			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error " + e.getMessage());
+		}
+	}
+	
+	
+	
+	@PutMapping("/updateMOMEntry")
+	public ResponseEntity<?> v(@RequestBody List<MOMEntries> momEntries) {
+
+		try {
+			 for (MOMEntries item : momEntries) {
+					
+		        	MOMEntries savedMomEntries=  momEntriesInfoRepositories.save(item);
+		            saveImages(savedMomEntries.getMomEntryId(), item.getIllustrationImages(),item.getCorrectedImages());
+			        }
+			return ResponseEntity.ok("All MOM entries Updated successfully.");
+
+		} catch (Exception e) {
+
+			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error " + e.getMessage());
+		}
+	}
+	
+	
+	@DeleteMapping("/deleteSingleMOMEntries/{momEntryId}")
+	public ResponseEntity<?> deleteSingleMOMEntries(@PathVariable String momEntryId) {
+
+		try {
+		
+		  momEntriesInfoRepositories.deleteById(momEntryId); 
+		  
+		 momEntriesImagesRepository.deleteByMomEntryId(momEntryId);
+			
+			return ResponseEntity.ok("Deleted MOM Entry ");
+
+		} catch (Exception e) {
+
+			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error " + e.getMessage());
+		}
+	}
+	
+	//this is used to remove section
+	
+	@DeleteMapping("/deleteBulkEntries")
+	public ResponseEntity<?> deleteBulkEntries(@RequestBody Map<String, Object> request) {
+	    try {
+	        String workOrderNo = request.get("workOrderNo").toString();
+
+	        // Delete MOM Entries by Work Order No
+	        momEntriesInfoRepositories.deleteByWorkOrderNo(workOrderNo);
+
+	        // Extract momEntryIds as List
+	        List<String> momEntryIds = (List<String>) request.get("momEntryIds");
+
+	        // Delete all MOMEntryImages by momEntryIds
+	        momEntriesImagesRepository.deleteBulkMomEntryIds(momEntryIds);
+
+	        return ResponseEntity.ok("Deleted MOM Entries and related images.");
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+	                             .body("Error: " + e.getMessage());
+	    }
+	}
+
+	
+	@DeleteMapping("/deleteMOMImage/{imageId}")
+	public ResponseEntity<?> deleteMOMImage(@PathVariable String imageId) {
+
+		try {
+		
+			momEntriesImagesRepository.deleteById(imageId);
+			
+			return ResponseEntity.ok("Deleted MOM Entry ");
+
+		} catch (Exception e) {
+
+			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error " + e.getMessage());
+		}
+	}
+	
+  
+	
+	@GetMapping("/getMOMList/{page}/{size}")
+	public ResponseEntity<?> getMOMList(@PathVariable int page,@PathVariable int size, @RequestParam(defaultValue = "") String projectName) {
+		try {
+			
+			
+			Map<String ,Object> data=new HashMap<String , Object>();
+			 Pageable pageable = PageRequest.of(page, size, Sort.by("createdDate").descending());
+			
+		        Page<MOMInfo> MOMInfos = momInfoRepository.findByCompanyIdAndProjectNameContainingIgnoreCase(company.getCompanyId(),projectName, pageable);
+		        List<MOMInfo> MOMInfosList = MOMInfos.getContent();
+		        data.put("MOMInfosList", MOMInfosList);
+		        data.put("totalPages", MOMInfos.getTotalPages());
+		        data.put("currentPage", MOMInfos.getNumber());
+			return ResponseEntity.ok(data);
+
+		} catch (Exception e) {
+
+			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error " + e.getMessage());
+		}
+	}
 
 }
