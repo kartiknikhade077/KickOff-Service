@@ -10,4 +10,6 @@ public interface CheckListItemsInfoRepository extends JpaRepository<CheckListIte
 	
        	List<CheckListItemsInfo> findByCheckListId(String checkListId);
 
+		void deleteByCheckListId(String checkListId);
+
 }

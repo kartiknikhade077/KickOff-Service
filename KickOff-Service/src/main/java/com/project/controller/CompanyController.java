@@ -6,6 +6,7 @@ import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +16,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -440,6 +442,8 @@ public class CompanyController {
 	        
 	        // Convert to CheckList
 	        CheckListInfo checkList = mapper.convertValue(request.get("checkListInfo"), CheckListInfo.class);
+	        checkList.setCreatedDateTime(LocalDateTime.now());
+	        checkList.setCompanyId(company.getCompanyId());
 
 	        // Save the checklist
 	        CheckListInfo savedCheckList = checkListInfoRepository.save(checkList);
@@ -1123,5 +1127,29 @@ public class CompanyController {
 		}
 	}
 	
+	
+	@Transactional
+	@DeleteMapping("/deleteCheckList/{checkListId}")
+    public ResponseEntity<String> deleteCheckListWithItems(@PathVariable String checkListId) {
+        try {
+            Optional<CheckListInfo> optionalCheckList = checkListInfoRepository.findById(checkListId);
+            if (optionalCheckList.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body("CheckList with ID " + checkListId + " not found.");
+            }
+
+            // Step 1: Delete associated items
+            checkListItemsInfoRepository.deleteByCheckListId(checkListId);
+
+            // Step 2: Delete checklist
+            checkListInfoRepository.deleteById(checkListId);
+
+            return ResponseEntity.ok("CheckList and its items deleted successfully.");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Failed to delete CheckList: " + e.getMessage());
+        }
+    }
 
 }
