@@ -31,6 +31,9 @@ import org.springframework.web.multipart.MultipartFile;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.client.UserSerivceClinet;
 import com.project.dto.Company;
+import com.project.entity.BOMCategory;
+import com.project.entity.BOMCategoryInfo;
+import com.project.entity.BOMInfo;
 import com.project.entity.CheckListCategory;
 import com.project.entity.CheckListCategoryAndItems;
 import com.project.entity.CheckListInfo;
@@ -89,6 +92,15 @@ public class CompanyController {
 	
 	@Autowired
 	private MOMInfoRepository momInfoRepository;
+	
+	@Autowired
+	private BOMCategoryRepository bomCategoryRepository;
+	
+	@Autowired
+	private BOMInfoRepository bomInfoRepository;
+	
+	@Autowired
+	private BOMCategoryInfoRepository bomCategoryInfoRepository;
 	
 	Company company;
 
@@ -925,5 +937,191 @@ public class CompanyController {
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error " + e.getMessage());
 		}
 	}
+	
+	
+	@PostMapping("/createBOMCategory")
+	public ResponseEntity<?> createBOMCategory(@RequestBody List<BOMCategory> BOMCategories) {
+
+		try {
+			List<BOMCategory> updatedBOMCategory=new ArrayList<>();
+			for(BOMCategory category: BOMCategories) {
+				
+				category.setCompanyId(company.getCompanyId());
+				updatedBOMCategory.add(category);
+			}
+			
+			return ResponseEntity.ok(ResponseEntity.ok(bomCategoryRepository.saveAll(updatedBOMCategory)));
+
+		} catch (Exception e) {
+
+			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error " + e.getMessage());
+		}
+	}
+	
+	
+	@PutMapping("/updateBOMCategory")
+	public ResponseEntity<?> updateBOMCategory(@RequestBody List<BOMCategory> BOMCategories) {
+
+		try {
+			List<BOMCategory> updatedBOMCategory=new ArrayList<>();
+			for(BOMCategory category: BOMCategories) {
+				
+				category.setCompanyId(company.getCompanyId());
+				updatedBOMCategory.add(category);
+			}
+			
+			return ResponseEntity.ok(ResponseEntity.ok(bomCategoryRepository.saveAll(updatedBOMCategory)));
+
+		} catch (Exception e) {
+
+			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error " + e.getMessage());
+		}
+	}
+	
+	@GetMapping("/getCategoryByType/{categoryType}")
+	public ResponseEntity<?> getCategoryByType(@PathVariable String categoryType) {
+
+		try {
+		
+		   List<BOMCategory> BOMCategoryList=bomCategoryRepository.findByCategoryTypeAndCompanyId(categoryType,company.getCompanyId());
+			
+			return ResponseEntity.ok(BOMCategoryList);
+
+		} catch (Exception e) {
+
+			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error " + e.getMessage());
+		}
+	}
+	
+	
+	@GetMapping("/getCategoryByCompanyId")
+	public ResponseEntity<?> getCategoryByCompanyId() {
+
+		try {
+		
+		   List<BOMCategory> BOMCategoryList=bomCategoryRepository.findByCompanyId(company.getCompanyId());
+		   
+		    Map<String, List<String>> grouped = BOMCategoryList.stream()
+		            .filter(BOMCategory::isStatus) // only true status
+		            .collect(Collectors.groupingBy(
+		            		BOMCategory::getCategoryType,
+		                Collectors.mapping(BOMCategory::getCategoryField, Collectors.toList())
+		            ));
+			
+			return ResponseEntity.ok(grouped);
+
+		} catch (Exception e) {
+
+			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error " + e.getMessage());
+		}
+	}
+	
+	@PostMapping("/createBOM")
+	public ResponseEntity<?> createBOM(@RequestBody Map<String, Object> request) {
+		try {
+			ObjectMapper mapper = new ObjectMapper();
+
+			// Convert to BOM
+			BOMInfo bomInfo = mapper.convertValue(request.get("BOMInfo"), BOMInfo.class);
+            bomInfo.setCreatedDateTime(LocalDateTime.now());
+			bomInfo.setCompanyId(company.getCompanyId());
+			BOMInfo savedBOMInfo= bomInfoRepository.save(bomInfo);
+
+			// Step 2: Extract "checkListItems" list and convert to List<CheckListItem>
+			List<Map<String, Object>> bomCategoryInfos = (List<Map<String, Object>>) request.get("BOMCategoryInfo");
+
+			List<BOMCategoryInfo> BOMCategoryInfoList = new ArrayList<>();
+			for (Map<String, Object> bomCategoryInfosMap : bomCategoryInfos) {
+				BOMCategoryInfo category = mapper.convertValue(bomCategoryInfosMap, BOMCategoryInfo.class);
+				category.setBomId(savedBOMInfo.getBomId());
+				BOMCategoryInfoList.add(category);
+
+			}
+
+			bomCategoryInfoRepository.saveAll(BOMCategoryInfoList);
+
+			return ResponseEntity.ok("BOM Created Successfully");
+
+		} catch (Exception e) {
+
+			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error " + e.getMessage());
+		}
+	}
+	
+	
+	
+	@PutMapping("/updateBOMInfo")
+	public ResponseEntity<?> updateBOMInfo(@RequestBody BOMInfo BOMInfo) {
+
+		try {
+			
+			BOMInfo.setCompanyId(company.getCompanyId());
+			return ResponseEntity.ok(ResponseEntity.ok(bomInfoRepository.save(BOMInfo)));
+
+		} catch (Exception e) {
+
+			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error " + e.getMessage());
+		}
+	}
+	
+	
+	@PutMapping("/updateBOMCategoryInfo")
+	public ResponseEntity<?> updateBOMCategoryInfo(@RequestBody BOMCategoryInfo BOMCategoryInfo) {
+
+		try {
+			return ResponseEntity.ok(ResponseEntity.ok(bomCategoryInfoRepository.save(BOMCategoryInfo)));
+
+		} catch (Exception e) {
+
+			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error " + e.getMessage());
+		}
+	}
+	
+	
+	@DeleteMapping("/deleteBOMCategoryInfo/{bomCategoryInfoId}")
+	public ResponseEntity<?> deleteBOMCategoryInfo(@PathVariable String bomCategoryInfoId) {
+
+		try {
+		
+			bomCategoryInfoRepository.deleteById(bomCategoryInfoId);
+			return ResponseEntity.ok("Categaory Deleted Deleted ");
+
+		} catch (Exception e) {
+
+			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error " + e.getMessage());
+		}
+	}
+	
+	
+	@GetMapping("/getAllBOMs/{page}/{size}")
+	public ResponseEntity<?> getAllBOMs(@PathVariable int page,@PathVariable int size, @RequestParam(defaultValue = "") String projectName) {
+		try {
+			
+			
+			Map<String ,Object> data=new HashMap<String , Object>();
+			 Pageable pageable = PageRequest.of(page, size, Sort.by("createdDateTime").descending());
+			
+		        Page<BOMInfo> BOMInfoPage = bomInfoRepository.findByCompanyIdAndProjectNameContainingIgnoreCase(company.getCompanyId(),projectName, pageable);
+		        List<BOMInfo> BOMInfoList = BOMInfoPage.getContent();
+		        data.put("BOMInfoList", BOMInfoList);
+		        data.put("totalPages", BOMInfoPage.getTotalPages());
+		        data.put("currentPage", BOMInfoPage.getNumber());
+			return ResponseEntity.ok(data);
+
+		} catch (Exception e) {
+
+			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error " + e.getMessage());
+		}
+	}
+	
 
 }
