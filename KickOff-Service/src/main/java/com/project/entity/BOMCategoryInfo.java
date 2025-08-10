@@ -10,11 +10,11 @@ public class BOMCategoryInfo {
 	
 	@Id
     @UuidGenerator
-    private String BOMCategoryInfoId;
+    private String bomcategoryInfoId;
 	private String bomId;
 	private int itemNo;
 	private String itemDescription;
-	private String malt;
+	private String matl;
 	private double finishSizeLength;
 	private double finishSizeHeight;
 	private double finishSizeWidth;
@@ -29,19 +29,20 @@ public class BOMCategoryInfo {
 	private int boughtOutQuantity;
 	private String specification;
 	private String section;
+	private String bomCategory;
 	
 	
-	public BOMCategoryInfo(String bOMCategoryInfoId, String bomId, int itemNo, String itemDescription, String malt,
+	public BOMCategoryInfo(String bomcategoryInfoId, String bomId, int itemNo, String itemDescription, String matl,
 			double finishSizeLength, double finishSizeHeight, double finishSizeWidth, double rawSizeLength,
 			double rawSizeHeight, double rawSizeWidth, int qunatity, String remarks, double modelWeight,
 			String orderingRemarks, String boughtOutItems, int boughtOutQuantity, String specification,
 			String section) {
 		super();
-		BOMCategoryInfoId = bOMCategoryInfoId;
+		this.bomcategoryInfoId = bomcategoryInfoId;
 		this.bomId = bomId;
 		this.itemNo = itemNo;
 		this.itemDescription = itemDescription;
-		this.malt = malt;
+		this.matl = matl;
 		this.finishSizeLength = finishSizeLength;
 		this.finishSizeHeight = finishSizeHeight;
 		this.finishSizeWidth = finishSizeWidth;
@@ -57,16 +58,25 @@ public class BOMCategoryInfo {
 		this.specification = specification;
 		this.section = section;
 	}
+	
+	
 	public BOMCategoryInfo() {
 		super();
 		// TODO Auto-generated constructor stub
 	}
-	public String getBOMCategoryInfoId() {
-		return BOMCategoryInfoId;
+	
+	
+
+	public String getBomcategoryInfoId() {
+		return bomcategoryInfoId;
 	}
-	public void setBOMCategoryInfoId(String bOMCategoryInfoId) {
-		BOMCategoryInfoId = bOMCategoryInfoId;
+
+
+	public void setBomcategoryInfoId(String bomcategoryInfoId) {
+		this.bomcategoryInfoId = bomcategoryInfoId;
 	}
+
+
 	public String getBomId() {
 		return bomId;
 	}
@@ -85,11 +95,11 @@ public class BOMCategoryInfo {
 	public void setItemDescription(String itemDescription) {
 		this.itemDescription = itemDescription;
 	}
-	public String getMalt() {
-		return malt;
+	public String getMatl() {
+		return matl;
 	}
-	public void setMalt(String malt) {
-		this.malt = malt;
+	public void setMatl(String matl) {
+		this.matl = matl;
 	}
 	public double getFinishSizeLength() {
 		return finishSizeLength;
@@ -174,6 +184,12 @@ public class BOMCategoryInfo {
 	}
 	public void setSection(String section) {
 		this.section = section;
+	}
+	public String getBomCategory() {
+		return bomCategory;
+	}
+	public void setBomCategory(String bomCategory) {
+		this.bomCategory = bomCategory;
 	}
 	
 	

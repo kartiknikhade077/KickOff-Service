@@ -6,6 +6,7 @@ import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -921,6 +922,22 @@ public class CompanyController {
 		}
 	}
 	
+	@GetMapping("/getPartNameByItemNo/{itemNo}")
+	public ResponseEntity<?> getPartNameByItemNo(@PathVariable int itemNo) {
+
+		try {
+		
+		   String partName=kickOffItemsRepository.findPartNameByItemNo(itemNo);
+			
+			return ResponseEntity.ok(partName);
+
+		} catch (Exception e) {
+
+			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error " + e.getMessage());
+		}
+	}
+	
 	
 	@GetMapping("/getWorkOrderNumberByItemNo/{itemNo}")
 	public ResponseEntity<?> getWorkOrderNumber(@PathVariable Integer itemNo) {
@@ -1053,6 +1070,29 @@ public class CompanyController {
 		}
 	}
 	
+	
+	@GetMapping("/getBOMInfoById/{bomId}")
+	public ResponseEntity<?> getBOMInfoById(@PathVariable String bomId) {
+
+		try {
+			Map<String ,Object> data=new HashMap<>();
+			
+			Optional<BOMInfo> bomInfo=bomInfoRepository.findById(bomId);
+			
+			List<BOMCategoryInfo> bomInfoCategory=bomCategoryInfoRepository.findByBomId(bomId);
+			
+			data.put("BOMInfo", bomInfo);
+			data.put("BOMInfoCategory", bomInfoCategory);
+			
+			return ResponseEntity.ok(data);
+			
+
+		} catch (Exception e) {
+
+			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error " + e.getMessage());
+		}
+	}
 	
 	
 	@PutMapping("/updateBOMInfo")

@@ -24,6 +24,8 @@ public class BOMInfo {
     private String revisionNumber;
     private String dieDetails;
     private LocalDateTime createdDateTime;
+    private String customerId;
+    private String projectId;
     
     
 	public BOMInfo() {
@@ -116,6 +118,18 @@ public class BOMInfo {
 	}
 	public void setCreatedDateTime(LocalDateTime createdDateTime) {
 		this.createdDateTime = createdDateTime;
+	}
+	public String getCustomerId() {
+		return customerId;
+	}
+	public void setCustomerId(String customerId) {
+		this.customerId = customerId;
+	}
+	public String getProjectId() {
+		return projectId;
+	}
+	public void setProjectId(String projectId) {
+		this.projectId = projectId;
 	}
     
     

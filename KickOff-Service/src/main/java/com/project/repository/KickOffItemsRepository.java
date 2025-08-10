@@ -15,5 +15,9 @@ public interface KickOffItemsRepository extends JpaRepository<KickOffItems, Stri
 	
 	@Query("SELECT k.itemNo FROM KickOffItems k JOIN KickOff ko ON k.kickOffId = ko.kickOffId WHERE ko.projectId = :projectId")
 	List<Integer> findItemNoByProjectId(@Param("projectId") String projectId);
+	
+	
+	@Query("SELECT partName FROM KickOffItems WHERE itemNo = :itemNo")
+	String findPartNameByItemNo(@Param("itemNo") int itemNo);
 
 }
