@@ -1280,9 +1280,16 @@ public class CompanyController {
 	                .body("Error fetching MOM details: " + e.getMessage());
 	    }
 	}
-
-
-
+	
+	@DeleteMapping("/deleteBomCategory/{categoryType}")
+    public ResponseEntity<String> deleteByCategoryType(@PathVariable String categoryType) {
+        try {
+            bomCategoryRepository.deleteByCategoryType(categoryType);
+            return ResponseEntity.ok("Deleted all BOMCategories with categoryType: " + categoryType);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Error deleting category: " + e.getMessage());
+        }
+    }
 	
 	@GetMapping("/getItemProcessByWorkOrderNumber/{workOrderNumber}")
 	public ResponseEntity<?> updateBOMCategoryInfo(@PathVariable String workOrderNumber) {
