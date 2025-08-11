@@ -1168,6 +1168,7 @@ public class CompanyController {
 	
 	
 
+
 	@Transactional
 	@DeleteMapping("/deleteCheckList/{checkListId}")
     public ResponseEntity<String> deleteCheckListWithItems(@PathVariable String checkListId) {
