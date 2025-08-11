@@ -9,6 +9,8 @@ import com.project.entity.MOMEntries;
 public interface MOMEntriesInfoRepositories extends JpaRepository<MOMEntries, String> {
 	
 	List<MOMEntries>deleteByWorkOrderNo(String wrokOrderNo);
+
+	List<MOMEntries> findByMomId(String momId);
 	
 
 }

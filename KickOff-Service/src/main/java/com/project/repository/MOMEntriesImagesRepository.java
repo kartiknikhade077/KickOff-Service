@@ -25,4 +25,10 @@ public interface MOMEntriesImagesRepository extends JpaRepository<MOMEntriesImag
 	void deleteBulkMomEntryIds(@Param("momEntryIds") List<String> momEntryIds);
 
 
+	List<MOMEntriesImages> findByMomEntryId(String momEntryId);
+
+
+	List<MOMEntriesImages> findByMomEntryIdAndType(String momEntryId, String string);
+
+
 }

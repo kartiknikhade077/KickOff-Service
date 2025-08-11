@@ -844,7 +844,7 @@ public class CompanyController {
 	}
 	
 	//this is used to remove section
-	
+	@Transactional
 	@DeleteMapping("/deleteBulkEntries")
 	public ResponseEntity<?> deleteBulkEntries(@RequestBody Map<String, Object> request) {
 	    try {
@@ -1151,5 +1151,95 @@ public class CompanyController {
                     .body("Failed to delete CheckList: " + e.getMessage());
         }
     }
+	
+	@DeleteMapping("/deleteMom/{momId}")
+    public ResponseEntity<String> deleteMOM(@PathVariable String momId) {
+        try {
+            List<MOMEntries> momEntriesList = momEntriesInfoRepositories.findByMomId(momId);
+            
+            for (MOMEntries momEntry : momEntriesList) {
+                List<MOMEntriesImages> imagesList = momEntriesImagesRepository.findByMomEntryId(momEntry.getMomEntryId());
+                momEntriesImagesRepository.deleteAll(imagesList);
+            }
+
+            momEntriesInfoRepositories.deleteAll(momEntriesList);
+            momInfoRepository.deleteById(momId);
+
+            return ResponseEntity.ok("MOMInfo and associated data deleted successfully.");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                                 .body("Error deleting MOMInfo: " + e.getMessage());
+        }
+    }
+	
+	@GetMapping("/getSingleMomById/{momId}")
+	public ResponseEntity<?> getSingleMomById(@PathVariable("momId") String momId) {
+	    try {
+	        // Fetch MOM info
+	        MOMInfo momInfo = momInfoRepository.findById(momId)
+	                .orElseThrow(() -> new RuntimeException("MOM not found with id: " + momId));
+
+	        // Fetch all entries
+	        List<MOMEntries> momEntriesList = momEntriesInfoRepositories.findByMomId(momId);
+
+	        // Prepare list of entry maps
+	        List<Map<String, Object>> momEntriesResponse = new ArrayList<>();
+
+	        for (MOMEntries entry : momEntriesList) {
+	            Map<String, Object> entryMap = new HashMap<>();
+	            entryMap.put("momEntryId", entry.getMomEntryId());
+	            entryMap.put("momId", entry.getMomId());
+	            entryMap.put("workOrderNo", entry.getWorkOrderNo());
+	            entryMap.put("tooleName", entry.getTooleName());
+	            entryMap.put("observation", entry.getObservation());
+	            entryMap.put("details", entry.getDetails());
+	            entryMap.put("correctedPoints", entry.getCorrectedPoints());
+	            entryMap.put("responsibleAndTarget", entry.getResponsibleAndTarget());
+
+	            // Illustration Images
+	            List<Map<String, String>> illustrationImagesList = momEntriesImagesRepository
+	                    .findByMomEntryIdAndType(entry.getMomEntryId(), "illustration")
+	                    .stream()
+	                    .map(img -> {
+	                        Map<String, String> imgMap = new HashMap<>();
+	                        imgMap.put("imageId", img.getImagesId());
+	                        imgMap.put("image", "data:image/jpeg;base64," + Base64.getEncoder().encodeToString(img.getImage()));
+	                        return imgMap;
+	                    })
+	                    .toList();
+	            entryMap.put("illustrationImages", illustrationImagesList);
+
+	            // Corrected Images
+	            List<Map<String, String>> correctedImagesList = momEntriesImagesRepository
+	                    .findByMomEntryIdAndType(entry.getMomEntryId(), "corrected")
+	                    .stream()
+	                    .map(img -> {
+	                        Map<String, String> imgMap = new HashMap<>();
+	                        imgMap.put("imageId", img.getImagesId());
+	                        imgMap.put("image", "data:image/jpeg;base64," + Base64.getEncoder().encodeToString(img.getImage()));
+	                        return imgMap;
+	                    })
+	                    .toList();
+	            entryMap.put("correctedImages", correctedImagesList);
+
+	            momEntriesResponse.add(entryMap);
+	        }
+
+	        // Final response
+	        Map<String, Object> response = new HashMap<>();
+	        response.put("momInfo", momInfo);
+	        response.put("momEntries", momEntriesResponse);
+
+	        return ResponseEntity.ok(response);
+
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+	                .body("Error fetching MOM details: " + e.getMessage());
+	    }
+	}
+
+
 
 }
