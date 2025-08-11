@@ -15,4 +15,6 @@ public interface itemProcessRepository extends JpaRepository<ItemProcess, String
 	
 	@Query("SELECT k.workOrderNumber FROM ItemProcess k  WHERE k.itemNo = :itemNo")
 	List<String> findWorkOrderNumberByItemNo(int itemNo);
+	
+    ItemProcess findByWorkOrderNumber(String workOrderNumber);
 }

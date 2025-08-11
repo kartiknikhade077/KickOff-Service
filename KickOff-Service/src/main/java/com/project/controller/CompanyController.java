@@ -1128,6 +1128,7 @@ public class CompanyController {
 	}
 	
 	
+
 	@Transactional
 	@DeleteMapping("/deleteCheckList/{checkListId}")
     public ResponseEntity<String> deleteCheckListWithItems(@PathVariable String checkListId) {
@@ -1241,5 +1242,20 @@ public class CompanyController {
 	}
 
 
+
+	
+	@GetMapping("/getItemProcessByWorkOrderNumber/{workOrderNumber}")
+	public ResponseEntity<?> updateBOMCategoryInfo(@PathVariable String workOrderNumber) {
+
+		try {
+			
+			return ResponseEntity.ok(ResponseEntity.ok(itemProcessRepository.findByWorkOrderNumber(workOrderNumber)));
+
+		} catch (Exception e) {
+
+			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error " + e.getMessage());
+		}
+	}
 
 }
