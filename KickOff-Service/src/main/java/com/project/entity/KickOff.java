@@ -29,6 +29,7 @@ public class KickOff {
 	private LocalDate startDate;
 	private LocalDate endDate;
 	private LocalDateTime createdDateTime;
+	private String customerId;
 	
 	
 	public KickOff(String kickOffId, String companyId, String employeeid, String customerName, String contactPersonName,
@@ -149,6 +150,12 @@ public class KickOff {
 	}
 	public void setCreatedDateTime(LocalDateTime createdDateTime) {
 		this.createdDateTime = createdDateTime;
+	}
+	public String getCustomerId() {
+		return customerId;
+	}
+	public void setCustomerId(String customerId) {
+		this.customerId = customerId;
 	}
 	
 	
