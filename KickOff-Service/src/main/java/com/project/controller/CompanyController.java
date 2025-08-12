@@ -286,6 +286,18 @@ public class CompanyController {
 
 		try {
 			kickOffItemsRepository.save(kickOffItem);
+			
+		
+		            if (kickOffItem.getImageList() != null && !kickOffItem.getImageList().isEmpty()) {
+		                for (String base64Image : kickOffItem.getImageList()) {
+		                   ItemsImages  image = new ItemsImages();
+		                    image.setItemId(kickOffItem.getItemId());
+		                    image.setImage(Base64.getDecoder().decode(base64Image));
+		                    itemImageRepository.save(image);
+		                }
+		            }
+		        
+			
 			return ResponseEntity.ok(kickOffItem);
 
 		} catch (Exception e) {
