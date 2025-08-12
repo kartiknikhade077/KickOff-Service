@@ -1,6 +1,7 @@
 package com.project.entity;
 
 import java.util.List;
+import java.util.Map;
 
 import org.hibernate.annotations.UuidGenerator;
 
@@ -21,6 +22,8 @@ public class KickOffItems {
     private String thickness;
     @Transient
     private List<String> imageList;
+    @Transient
+    private Map<String,String> imageListWithId;
     
 	public KickOffItems(String itemId, String kickOffId, int itemNo, String partName, String material,
 			String thickness) {
@@ -83,6 +86,16 @@ public class KickOffItems {
 
 	public void setImageList(List<String> imageList) {
 		this.imageList = imageList;
+	}
+
+
+	public Map<String, String> getImageListWithId() {
+		return imageListWithId;
+	}
+
+
+	public void setImageListWithId(Map<String, String> imageListWithId) {
+		this.imageListWithId = imageListWithId;
 	}
     
 	

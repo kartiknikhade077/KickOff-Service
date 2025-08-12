@@ -240,11 +240,24 @@ public class CompanyController {
 			            ItemsImages::getItemId,
 			            Collectors.mapping(img -> Base64.getEncoder().encodeToString(img.getImage()), Collectors.toList())
 			        ));
+			
+	        // Step 4: Group images with IDs by itemId
+	        Map<String, Map<String, String>> imagesWithIdByItemId = allImages.stream()
+	                .collect(Collectors.groupingBy(
+	                        ItemsImages::getItemId,
+	                        Collectors.toMap(
+	                                ItemsImages::getImageId,
+	                                img -> Base64.getEncoder().encodeToString(img.getImage())
+	                        )
+	                ));
 
 			// Step 4: Set imageList into KickOffItems
 			for (KickOffItems item : kickOffItemsList) {
 			    List<String> imageList = imagesByItemId.getOrDefault(item.getItemId(), new ArrayList<>());
 			    item.setImageList(imageList);
+			    
+			      Map<String, String> imageListWithId = imagesWithIdByItemId.getOrDefault(item.getItemId(), new HashMap<>());
+		            item.setImageListWithId(imageListWithId);
 			}
 
 			Map<String, Object> data = new HashMap<>();
