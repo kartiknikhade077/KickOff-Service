@@ -29,6 +29,9 @@ public class MOMInfo {
 	private String thirdCompany;
 	private String thirdPersonCompany;
 	private String remark;
+	private String projectId;
+	private String customerId;
+	
 	public MOMInfo(String momId, String companyId, String employeeeId,
 			String customerName, String venue, String contactPersonName, String employeeName, String projectName,
 			String itemNo, Date createdDate, String introduction, String thirdCompany, String thirdPersonCompany) {
@@ -136,7 +139,19 @@ public class MOMInfo {
 	public void setRemark(String remark) {
 		this.remark = remark;
 	}
-	 @PrePersist
+	 public String getProjectId() {
+		return projectId;
+	}
+	public void setProjectId(String projectId) {
+		this.projectId = projectId;
+	}
+	public String getCustomerId() {
+		return customerId;
+	}
+	public void setCustomerId(String customerId) {
+		this.customerId = customerId;
+	}
+	@PrePersist
 	    public void prePersist() {
 	        if (momId == null) {
 	        	momId = UuidCreator.getTimeOrderedEpoch().toString();  // UUIDv7-style sortable UUID

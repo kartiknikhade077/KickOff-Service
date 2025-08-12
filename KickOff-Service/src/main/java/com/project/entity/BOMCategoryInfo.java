@@ -21,7 +21,7 @@ public class BOMCategoryInfo {
 	private double rawSizeLength;
 	private double rawSizeHeight;
 	private double rawSizeWidth;
-	private int qunatity;
+	private int quantity;
 	private String remarks;
 	private double modelWeight;
 	private String orderingRemarks;
@@ -34,7 +34,7 @@ public class BOMCategoryInfo {
 	
 	public BOMCategoryInfo(String bomcategoryInfoId, String bomId, int itemNo, String itemDescription, String matl,
 			double finishSizeLength, double finishSizeHeight, double finishSizeWidth, double rawSizeLength,
-			double rawSizeHeight, double rawSizeWidth, int qunatity, String remarks, double modelWeight,
+			double rawSizeHeight, double rawSizeWidth, int quantity, String remarks, double modelWeight,
 			String orderingRemarks, String boughtOutItems, int boughtOutQuantity, String specification,
 			String section) {
 		super();
@@ -49,7 +49,7 @@ public class BOMCategoryInfo {
 		this.rawSizeLength = rawSizeLength;
 		this.rawSizeHeight = rawSizeHeight;
 		this.rawSizeWidth = rawSizeWidth;
-		this.qunatity = qunatity;
+		this.quantity = quantity;
 		this.remarks = remarks;
 		this.modelWeight = modelWeight;
 		this.orderingRemarks = orderingRemarks;
@@ -137,12 +137,7 @@ public class BOMCategoryInfo {
 	public void setRawSizeWidth(double rawSizeWidth) {
 		this.rawSizeWidth = rawSizeWidth;
 	}
-	public int getQunatity() {
-		return qunatity;
-	}
-	public void setQunatity(int qunatity) {
-		this.qunatity = qunatity;
-	}
+
 	public String getRemarks() {
 		return remarks;
 	}
@@ -190,6 +185,16 @@ public class BOMCategoryInfo {
 	}
 	public void setBomCategory(String bomCategory) {
 		this.bomCategory = bomCategory;
+	}
+
+
+	public int getQuantity() {
+		return quantity;
+	}
+
+
+	public void setQuantity(int quantity) {
+		this.quantity = quantity;
 	}
 	
 	
