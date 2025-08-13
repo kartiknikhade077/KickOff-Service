@@ -324,7 +324,7 @@ public class CompanyController {
 	public ResponseEntity<?> deleteItem(@PathVariable String itemId) {
 
 		try {
-		
+			itemImageRepository.deleteByItemId(itemId);
 			kickOffItemsRepository.deleteById(itemId);
 			return ResponseEntity.ok("Item Deleted ");
 
