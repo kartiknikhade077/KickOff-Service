@@ -21,6 +21,8 @@ public class ItemProcess {
     private double width;
     private String remarks;
     private String operationNumber;
+    private boolean scope;
+    private boolean cancel;
 	public ItemProcess(String partProcessId, String kickOffId, int itemNo, String workOrderNumber, String designerName,
 			String employeeId, String process, double length, double height, double width, String remarks) {
 		super();
@@ -112,7 +114,20 @@ public class ItemProcess {
 	public void setOperationNumber(String operationNumber) {
 		this.operationNumber = operationNumber;
 	}
+	public boolean isScope() {
+		return scope;
+	}
+	public void setScope(boolean scope) {
+		this.scope = scope;
+	}
+	public boolean isCancel() {
+		return cancel;
+	}
+	public void setCancel(boolean cancel) {
+		this.cancel = cancel;
+	}
     
+	
     
     
 }
