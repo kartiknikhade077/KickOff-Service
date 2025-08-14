@@ -13,5 +13,7 @@ public interface KickOffRepository extends JpaRepository<KickOff, String> {
 	
 	
   Page<KickOff> findByCompanyIdAndProjectNameContainingIgnoreCase(String companyId,String projectName ,Pageable pageable);
+  
+  KickOff findByCustomerIdAndProjectId(String customerId,String projectId);
 	
 }

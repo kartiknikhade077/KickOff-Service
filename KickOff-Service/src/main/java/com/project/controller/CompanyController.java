@@ -1329,5 +1329,28 @@ public class CompanyController {
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error " + e.getMessage());
 		}
 	}
+	
+	
+	@GetMapping("/checkKickOffExist/{customerId}/{projectId}")
+	public ResponseEntity<?> checkKickOffExist(@PathVariable String customerId,@PathVariable String projectId) {
+
+		try {
+        	boolean isKickOffExist=false;
+ 		 KickOff kickOff=	kickOffRepository.findByCustomerIdAndProjectId(customerId,projectId);
+			if(kickOff==null) {
+				isKickOffExist=false;
+				
+			}else {
+				isKickOffExist=true;
+			}
+			
+			return ResponseEntity.ok(isKickOffExist);
+
+		} catch (Exception e) {
+
+			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error " + e.getMessage());
+		}
+	}
 
 }
