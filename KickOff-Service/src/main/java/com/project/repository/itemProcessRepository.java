@@ -9,7 +9,7 @@ import com.project.entity.ItemProcess;
 
 public interface itemProcessRepository extends JpaRepository<ItemProcess, String> {
 	
-	List<ItemProcess> findByKickOffId(String kickOffId);
+	List<ItemProcess> findByKickOffIdOrderBySequence(String kickOffId);
  
 	List<ItemProcess> findByEmployeeId(String employeeId);
 	

@@ -223,7 +223,7 @@ public class CompanyController {
 
 			KickOff kickOff = kickOffRepository.findBykickOffId(kickOffId);
 			List<KickOffItems> kickOffItemsList = kickOffItemsRepository.findByKickOffId(kickOffId);
-			List<ItemProcess> itemProcessList = itemProcessRepository.findByKickOffId(kickOffId);
+			List<ItemProcess> itemProcessList = itemProcessRepository.findByKickOffIdOrderBySequence(kickOffId);
 			List<CustomerRequirements> requirementList = customerRequirementsRepository.findByKickOffId(kickOffId);
 			List<KickOffSignature> listofSingnature = kickOffSignatureRepository.findByKickOffId(kickOffId);
 			

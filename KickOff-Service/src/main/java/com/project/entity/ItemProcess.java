@@ -28,10 +28,14 @@ public class ItemProcess {
     @Column(name = "parent_work_order_no", length = 255)
 	private String parentWorkOrderNo;
     
+    private int sequence;
+    
+	
+	
 	
 	public ItemProcess(String partProcessId, String kickOffId, int itemNo, String workOrderNumber, String designerName,
 			String employeeId, String process, double length, double height, double width, String remarks,
-			String operationNumber, boolean scope, boolean cancel, String parentWorkOrderNo) {
+			String operationNumber, boolean scope, boolean cancel, String parentWorkOrderNo, int sequence) {
 		super();
 		this.partProcessId = partProcessId;
 		this.kickOffId = kickOffId;
@@ -48,8 +52,8 @@ public class ItemProcess {
 		this.scope = scope;
 		this.cancel = cancel;
 		this.parentWorkOrderNo = parentWorkOrderNo;
+		this.sequence = sequence;
 	}
-	
 	public ItemProcess() {
 		super();
 		// TODO Auto-generated constructor stub
@@ -143,6 +147,12 @@ public class ItemProcess {
 	}
 	public void setParentWorkOrderNo(String parentWorkOrderNo) {
 		this.parentWorkOrderNo = parentWorkOrderNo;
+	}
+	public int getSequence() {
+		return sequence;
+	}
+	public void setSequence(int sequence) {
+		this.sequence = sequence;
 	}
     
 	
