@@ -2,6 +2,7 @@ package com.project.entity;
 
 import org.hibernate.annotations.UuidGenerator;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 
@@ -23,8 +24,14 @@ public class ItemProcess {
     private String operationNumber;
     private boolean scope;
     private boolean cancel;
+    
+    @Column(name = "parent_work_order_no", length = 255)
+	private String parentWorkOrderNo;
+    
+	
 	public ItemProcess(String partProcessId, String kickOffId, int itemNo, String workOrderNumber, String designerName,
-			String employeeId, String process, double length, double height, double width, String remarks) {
+			String employeeId, String process, double length, double height, double width, String remarks,
+			String operationNumber, boolean scope, boolean cancel, String parentWorkOrderNo) {
 		super();
 		this.partProcessId = partProcessId;
 		this.kickOffId = kickOffId;
@@ -37,7 +44,12 @@ public class ItemProcess {
 		this.height = height;
 		this.width = width;
 		this.remarks = remarks;
+		this.operationNumber = operationNumber;
+		this.scope = scope;
+		this.cancel = cancel;
+		this.parentWorkOrderNo = parentWorkOrderNo;
 	}
+	
 	public ItemProcess() {
 		super();
 		// TODO Auto-generated constructor stub
@@ -125,6 +137,12 @@ public class ItemProcess {
 	}
 	public void setCancel(boolean cancel) {
 		this.cancel = cancel;
+	}
+	public String getParentWorkOrderNo() {
+		return parentWorkOrderNo;
+	}
+	public void setParentWorkOrderNo(String parentWorkOrderNo) {
+		this.parentWorkOrderNo = parentWorkOrderNo;
 	}
     
 	
